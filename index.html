@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OF ESSENCE | Artisanal Perfumery</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-neutral text-dark-mate">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-dark fixed-top py-3 header-shadow">
+        <div class="container">
+            <a class="navbar-brand font-serif text-accent" href="index.html">OF ESSENCE</a>
+            <button class="navbar-toggler border-accent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="#catalogo">Catálogo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="#contacto">Contacto</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                    <button class="btn text-light position-relative" data-bs-toggle="modal" data-bs-target="#cartModal">
+                        <i class="bi bi-cart3 fs-5"></i>
+                        <span id="cartCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-primary-dark border border-primary-dark">
+                            0
+                        </span>
+                    </button>
+                    <button class="btn btn-outline-gold btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="bi bi-person"></i> Usuario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section d-flex align-items-center position-relative">
+        <div class="hero-overlay"></div>
+        <div class="container text-center position-relative z-index-1 py-5 mt-5">
+            <h1 class="display-3 font-serif text-light mb-2">OF ESSENCE</h1>
+            <p class="h5 font-sans text-accent mb-5 fw-light letter-spacing-wide">ARTISANAL PERFUMERY</p>
+            
+            <p class="text-light-50 mb-4 px-3">Descubre la esencia del verdadero lujo. Explora nuestras colecciones exclusivas.</p>
+            
+            <div class="d-flex flex-column flex-md-row justify-content-center gap-3 px-3">
+                <a href="CATALOGO%20DAMA%202026.pdf" target="_blank" class="btn btn-gold btn-lg rounded-0 px-4 py-3 custom-transition">
+                    <i class="bi bi-download me-2"></i>Descargar Catálogo Dama 2026
+                </a>
+                <a href="CATALOGO%20CABALLERO%202026.pdf" target="_blank" class="btn btn-outline-light-gold btn-lg rounded-0 px-4 py-3 custom-transition">
+                    <i class="bi bi-download me-2"></i>Descargar Catálogo Caballero 2026
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Catalog Section -->
+    <section id="catalogo" class="py-5 bg-neutral">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="font-serif display-5 mb-3 text-primary-dark">Colección Exclusiva</h2>
+                <div class="gold-divider mx-auto mb-4"></div>
+                <p class="text-muted font-sans">Encuentra la fragancia perfecta que define tu presencia.</p>
+            </div>
+            
+            <div class="row g-4" id="productGrid">
+                <!-- Los productos se cargarán dinámicamente aquí vía JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacto" class="bg-primary-dark text-light py-5 border-top border-accent">
+        <div class="container text-center py-4">
+            <h3 class="font-serif text-accent mb-3">OF ESSENCE</h3>
+            <p class="text-light-50 mb-4 font-sans small">Elevando la experiencia de perfumería a su máxima expresión.</p>
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <a href="#" class="text-accent fs-4 btn-social"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="text-accent fs-4 btn-social"><i class="bi bi-facebook"></i></a>
+            </div>
+<p class="mb-0 text-white small letter-spacing-wide">Creado por David Cevallos</p>        </div>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-0 border-accent">
+                <div class="modal-header bg-primary-dark text-accent border-bottom-0 pb-0">
+                    <h5 class="modal-title font-serif" id="cartModalLabel">Tu Selección</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-neutral p-4">
+                    <div id="cartItemsContainer" class="d-flex flex-column gap-3">
+                        <!-- Cart items injected by JS -->
+                        <p class="text-center text-muted my-4">Tu carrito está vacío.</p>
+                    </div>
+                </div>
+                <div class="modal-footer bg-neutral border-top-0 d-flex flex-column pt-0">
+                    <button type="button" class="btn btn-gold w-100 rounded-0 py-2 d-none" id="btnCheckoutWhatsApp">
+                        <i class="bi bi-whatsapp me-2"></i>Finalizar Consulta por WhatsApp
+                    </button>
+                    <button type="button" class="btn btn-outline-dark w-100 rounded-0 mt-2" data-bs-dismiss="modal">Seguir Explorando</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-0">
+                <div class="modal-header bg-primary-dark text-accent">
+                    <h5 class="modal-title font-serif" id="loginModalLabel">Acceso Administrativo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-neutral">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="adminUser" class="form-label font-sans small text-uppercase">Usuario</label>
+                            <input type="text" class="form-control rounded-0" id="adminUser" required placeholder="administrador">
+                        </div>
+                        <div class="mb-4">
+                            <label for="adminPass" class="form-label font-sans small text-uppercase">Contraseña</label>
+                            <input type="password" class="form-control rounded-0" id="adminPass" required placeholder="********">
+                        </div>
+                        <button type="submit" class="btn btn-gold w-100 rounded-0">Ingresar al Panel</button>
+                        <p id="loginError" class="text-danger small mt-2 d-none">Credenciales incorrectas.</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

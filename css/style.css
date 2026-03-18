@@ -1,0 +1,203 @@
+/* OFF ESSENCE - Luxury Perfumery Design System */
+:root {
+    /* Color Palette */
+    --color-primary: #0A1C3E;
+    --color-accent: #FFFFFF;
+    --color-neutral: #F4F6F9;
+    --color-white: #FFFFFF;
+    
+    /* Typography */
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+    
+    /* Variables */
+    --transition-speed: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Global Typography & Resets */
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-neutral);
+    color: var(--color-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-serif {
+    font-family: var(--font-serif);
+}
+
+.font-sans {
+    font-family: var(--font-sans);
+}
+
+/* Custom Color Utilities */
+.bg-primary-dark { background-color: var(--color-primary) !important; }
+.bg-neutral { background-color: var(--color-neutral) !important; }
+.bg-accent { background-color: var(--color-accent) !important; }
+
+.text-primary-dark { color: var(--color-primary) !important; }
+.text-accent { color: var(--color-accent) !important; }
+.text-light { color: var(--color-white) !important; }
+.text-light-50 { color: rgba(255,255,255,0.7) !important; }
+
+.border-accent { border-color: var(--color-accent) !important; }
+
+/* Buttons Customization */
+.btn-gold {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+    border: 1px solid var(--color-accent);
+}
+
+.btn-gold:hover, .btn-gold:focus {
+    background-color: transparent;
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.btn-outline-gold {
+    background-color: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+}
+
+.btn-outline-gold:hover, .btn-outline-gold:focus {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+}
+
+.btn-outline-light-gold {
+    background-color: rgba(255,255,255,0.05);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    backdrop-filter: blur(5px);
+}
+
+.btn-outline-light-gold:hover {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+}
+
+.custom-transition {
+    transition: all var(--transition-speed);
+}
+
+/* Navbar Supplements */
+.header-shadow {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    background-color: rgba(10, 28, 62, 0.95); /* matching navy blue */
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    background-color: var(--color-primary);
+    background-image: url('../logooffessense.jpeg');
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 28, 62, 0.6); /* Navy mask para oscurecer sutilmente y dar legibilidad */
+    z-index: 0;
+}
+
+.z-index-1 {
+    z-index: 1;
+}
+
+.letter-spacing-wide {
+    letter-spacing: 0.2rem;
+}
+
+/* Dividers */
+.gold-divider {
+    width: 60px;
+    height: 2px;
+    background-color: var(--color-accent);
+}
+
+/* Product Cards */
+.card-luxury {
+    background-color: var(--color-white);
+    border: none;
+    border-radius: 0;
+    transition: box-shadow var(--transition-speed), transform var(--transition-speed);
+    overflow: hidden;
+}
+
+.card-luxury:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+.card-luxury .card-img-top {
+    height: 320px;
+    object-fit: cover;
+    border-radius: 0;
+    transition: transform 0.6s ease;
+}
+
+.card-luxury:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.card-body-luxury {
+    padding: 2rem;
+}
+
+.product-title {
+    font-size: 1.35rem;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-select-luxury {
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: none !important;
+}
+
+.form-select-luxury:focus {
+    border-color: var(--color-accent);
+}
+
+/* Modals */
+.modal-content {
+    border-radius: 0;
+}
+
+/* Footer Socials */
+.btn-social {
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+}
+.btn-social:hover {
+    color: var(--color-white) !important;
+    transform: translateY(-3px);
+}
+
+/* Utility to ensure space rendering (py-5 and mb-4 overrides if needed) */
+@media (max-width: 768px) {
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    .hero-section {
+        min-height: 80vh;
+    }
+}
