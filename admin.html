@@ -43,7 +43,7 @@
     <main class="container py-5 mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="font-serif text-primary-dark m-0">Inventario de Perfumes</h2>
-            <button class="btn btn-gold rounded-0" onclick="openProductModal()">
+            <button class="btn btn-primary-dark rounded-0" onclick="openProductModal()">
                 <i class="bi bi-plus-lg me-1"></i> Agregar Perfume
             </button>
         </div>
@@ -120,8 +120,8 @@
                 </div>
                 <div class="modal-footer bg-neutral pt-0 border-top-0">
                     <button type="button" class="btn btn-outline-dark rounded-0" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary-dark rounded-0 border-accent text-accent" onclick="saveProduct()">
-                        Guardar Cambios
+                    <button type="submit" class="btn btn-primary-dark rounded-0 border-accent" id="productSubmitBtn" form="productForm">
+                        Agregar Perfume
                     </button>
                 </div>
             </div>

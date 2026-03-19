@@ -1,6 +1,6 @@
 // OFF ESSENCE - Store Logic & Cart
 
-const WHATSAPP_NUMBER = '1234567890'; // Replace with real number
+const WHATSAPP_NUMBER = '593963666106';
 
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
@@ -53,7 +53,7 @@ function renderProducts() {
                             <button onclick="addToCart('${product.id}', '${product.name}')" class="btn btn-outline-dark rounded-0 custom-transition">
                                 <i class="bi bi-cart-plus me-1"></i> Añadir al Carrito
                             </button>
-                            <button onclick="consultAvailability('${product.name}', '${product.id}')" class="btn btn-gold rounded-0 custom-transition">
+                            <button onclick="consultAvailability('${product.name}', '${product.id}')" class="btn btn-gold btn-whatsapp rounded-0 custom-transition">
                                 <i class="bi bi-whatsapp me-1"></i> Consultar Disponibilidad
                             </button>
                         </div>

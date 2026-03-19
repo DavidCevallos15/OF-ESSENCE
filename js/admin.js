@@ -6,6 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     renderAdminTable();
 
+    const productForm = document.getElementById('productForm');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveProduct();
+        });
+    }
+
     const uploadInput = document.getElementById('perfumeImageUpload');
     if (uploadInput) {
         uploadInput.addEventListener('change', function(e) {
@@ -97,6 +105,7 @@ function openProductModal(id = null) {
     const modalEl = document.getElementById('productFormModal');
     const form = document.getElementById('productForm');
     const modalTitle = document.getElementById('productFormModalLabel');
+    const submitBtn = document.getElementById('productSubmitBtn');
 
     // Reset Form & Upload States
     form.reset();
@@ -109,6 +118,7 @@ function openProductModal(id = null) {
     if (id) {
         // Edit Mode
         modalTitle.textContent = 'Editar Perfume';
+        if (submitBtn) submitBtn.textContent = 'Guardar Cambios';
         const products = getProducts();
         const product = products.find(p => p.id === id);
 
@@ -131,6 +141,7 @@ function openProductModal(id = null) {
     } else {
         // Create Mode
         modalTitle.textContent = 'Agregar Nuevo Perfume';
+        if (submitBtn) submitBtn.textContent = 'Agregar Perfume';
     }
 
     const modalInstance = new bootstrap.Modal(modalEl);
