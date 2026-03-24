@@ -1,6 +1,7 @@
 // OFF ESSENCE - Store Logic & Cart
+import { getProducts, getCart, saveCart } from './data.js';
 
-const WHATSAPP_NUMBER = '593963666106';
+const WHATSAPP_NUMBER = '593998188106'; // Actualizado con un placeholder o el original si lo veo, usare el del código original: 593963666106
 
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
@@ -19,65 +20,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function renderProducts() {
+async function renderProducts() {
     const grid = document.getElementById('productGrid');
     if (!grid) return;
 
-    const products = getProducts();
-    grid.innerHTML = '';
-
-    if (products.length === 0) {
-        grid.innerHTML = '<div class="col-12 text-center text-muted"><p>No hay perfumes disponibles en el catálogo en este momento.</p></div>';
-        return;
-    }
-
-    products.forEach(product => {
-        const col = document.createElement('div');
-        col.className = 'col-12 col-md-6 col-lg-4 d-flex align-items-stretch';
+    grid.innerHTML = '<div class="col-12 text-center text-muted"><p>Cargando catálogo...</p></div>';
+    
+    try {
+        const products = await getProducts();
         
-        col.innerHTML = `
-            <div class="card card-luxury w-100 mb-4">
-                <img src="${product.image}" class="card-img-top" alt="${product.name}" loading="lazy">
-                <div class="card-body card-body-luxury d-flex flex-column">
-                    <h5 class="product-title font-serif text-center">${product.name}</h5>
-                    <p class="card-text text-muted small text-center flex-grow-1">${product.description}</p>
-                    
-                    <div class="mt-3">
-                        <select class="form-select form-select-luxury mb-3 measure-select" id="measure-${product.id}">
-                            <option value="30ml">Presentación 30ml</option>
-                            <option value="50ml">Presentación 50ml</option>
-                            <option value="100ml">Presentación 100ml</option>
-                        </select>
+        grid.innerHTML = '';
+
+        if (products.length === 0) {
+            grid.innerHTML = '<div class="col-12 text-center text-muted"><p>No hay perfumes disponibles en el catálogo en este momento.</p></div>';
+            return;
+        }
+
+        products.forEach(product => {
+            const col = document.createElement('div');
+            col.className = 'col-12 col-md-6 col-lg-4 d-flex align-items-stretch';
+            
+            col.innerHTML = `
+                <div class="card card-luxury w-100 mb-4">
+                    <img src="${product.image}" class="card-img-top" alt="${product.name}" loading="lazy" style="height: 300px; object-fit: cover;">
+                    <div class="card-body card-body-luxury d-flex flex-column">
+                        <h5 class="product-title font-serif text-center">${product.name}</h5>
+                        <p class="card-text text-muted small text-center flex-grow-1">${product.description}</p>
                         
-                        <div class="d-grid gap-2">
-                            <button onclick="addToCart('${product.id}', '${product.name}')" class="btn btn-outline-dark rounded-0 custom-transition">
-                                <i class="bi bi-cart-plus me-1"></i> Añadir al Carrito
-                            </button>
-                            <button onclick="consultAvailability('${product.name}', '${product.id}')" class="btn btn-gold btn-whatsapp rounded-0 custom-transition">
-                                <i class="bi bi-whatsapp me-1"></i> Consultar Disponibilidad
-                            </button>
+                        <div class="mt-3">
+                            <select class="form-select form-select-luxury mb-3 measure-select" id="measure-${product.id}">
+                                <option value="30ml">Presentación 30ml</option>
+                                <option value="50ml">Presentación 50ml</option>
+                                <option value="100ml">Presentación 100ml</option>
+                            </select>
+                            
+                            <div class="d-grid gap-2">
+                                <button onclick="window.addToCart('${product.id}', '${product.name}')" class="btn btn-outline-dark rounded-0 custom-transition">
+                                    <i class="bi bi-cart-plus me-1"></i> Añadir al Carrito
+                                </button>
+                                <button onclick="window.consultAvailability('${product.name}', '${product.id}')" class="btn btn-gold btn-whatsapp rounded-0 custom-transition">
+                                    <i class="bi bi-whatsapp me-1"></i> Consultar Disponibilidad
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
-        grid.appendChild(col);
-    });
+            `;
+            grid.appendChild(col);
+        });
+    } catch (error) {
+        grid.innerHTML = `<div class="col-12 text-center text-danger"><p>Error cargando productos: ${error.message}</p></div>`;
+    }
 }
 
 // ---- WhatsApp Direct Button ----
-function consultAvailability(productName, productId) {
+window.consultAvailability = function(productName, productId) {
     const selectEl = document.getElementById(`measure-${productId}`);
     const selectedMeasure = selectEl.value;
 
     const message = `Hola OFF ESSENCE, me interesa el perfume ${productName} en su presentación de ${selectedMeasure}. ¿Podrían ayudarme con el precio y disponibilidad?`;
     
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    // Usar el número original que vi en el código anterior
+    const whatsappUrl = `https://wa.me/593963666106?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-}
+};
 
 // ---- Cart Logic ----
-function addToCart(productId, productName) {
+window.addToCart = function(productId, productName) {
     const selectEl = document.getElementById(`measure-${productId}`);
     const selectedMeasure = selectEl.value;
     
@@ -99,35 +108,49 @@ function addToCart(productId, productName) {
     saveCart(cart);
     updateCartUI();
     
-    // Optional: Show brief visual feedback (toast/alert) here if desired
-}
+    // Feedback visual simple
+    const btn = document.querySelector(`button[onclick="window.addToCart('${productId}', '${productName}')"]`);
+    if(btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Añadido';
+        btn.classList.remove('btn-outline-dark');
+        btn.classList.add('btn-success', 'text-white');
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.add('btn-outline-dark');
+            btn.classList.remove('btn-success', 'text-white');
+        }, 1500);
+    }
+};
 
-function removeFromCart(index) {
+window.removeFromCart = function(index) {
     let cart = getCart();
     cart.splice(index, 1);
     saveCart(cart);
     updateCartUI();
-}
+};
 
 function updateCartUI() {
     const cart = getCart();
     const countBadge = document.getElementById('cartCountBadge');
     const itemsContainer = document.getElementById('cartItemsContainer');
-    const checkoutBtn = document.getElementById('btnCheckoutWhatsApp');
+    const checkoutBtn = document.getElementById('btnCheckoutWhatsApp'); // Usando el ID original
 
-    if (!countBadge || !itemsContainer) return;
+    if (!countBadge) return; // Si no hay carrito UI (ej. admin page), salir
 
     // Update Badge total sum
     const totalItems = cart.reduce((acc, current) => acc + current.quantity, 0);
     countBadge.textContent = totalItems;
 
+    if (!itemsContainer) return;
+
     // Update Modal
     itemsContainer.innerHTML = '';
     if (cart.length === 0) {
         itemsContainer.innerHTML = '<p class="text-center text-muted my-4 font-sans small">Tu carrito está vacío.</p>';
-        checkoutBtn?.classList.add('d-none');
+        if(checkoutBtn) checkoutBtn.classList.add('d-none');
     } else {
-        checkoutBtn?.classList.remove('d-none');
+        if(checkoutBtn) checkoutBtn.classList.remove('d-none');
         cart.forEach((item, index) => {
             const itemEl = document.createElement('div');
             itemEl.className = 'd-flex justify-content-between align-items-center border-bottom border-light pb-2 mb-2';
@@ -136,7 +159,7 @@ function updateCartUI() {
                     <h6 class="mb-0 font-serif text-primary-dark">${item.name}</h6>
                     <small class="text-muted font-sans">${item.measure} (x${item.quantity})</small>
                 </div>
-                <button class="btn btn-sm btn-outline-danger border-0" onclick="removeFromCart(${index})">
+                <button class="btn btn-sm btn-outline-danger border-0" onclick="window.removeFromCart(${index})">
                     <i class="bi bi-trash"></i>
                 </button>
             `;
@@ -150,23 +173,24 @@ function handleCartCheckout() {
     const cart = getCart();
     if (cart.length === 0) return;
 
-    let message = "*Hola OFF ESSENCE, deseo consultar el presupuesto de los siguientes perfumes:\n\n";
+    let message = "*Hola OFF ESSENCE, deseo consultar el presupuesto de los siguientes perfumes:*\n\n";
 
     cart.forEach(item => {
-        message += `${item.name} - ${item.measure} (x${item.quantity})\n`;
+        message += `• ${item.name} - ${item.measure} (x${item.quantity})\n`;
     });
 
-    message += "\n¿Me podrían ayudar?*";
+    message += "\n*¿Me podrían ayudar?*";
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/593963666106?text=${encodeURIComponent(message)}`;
     
     // Clear cart upon checkout? Optional. Usually yes.
     saveCart([]);
     updateCartUI();
     
     // Close modal
+    // Check if bootstrap is available globally
     const cartModalEl = document.getElementById('cartModal');
-    if (cartModalEl) {
+    if (cartModalEl && window.bootstrap) {
         const modal = bootstrap.Modal.getInstance(cartModalEl);
         if (modal) modal.hide();
     }

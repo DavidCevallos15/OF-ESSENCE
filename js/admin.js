@@ -1,16 +1,19 @@
 // OFF ESSENCE - Admin Panel Logic
+import { getProducts, addProduct, updateProduct, deleteProductFromDB } from './data.js';
 
 let currentUploadedImageBase64 = null;
+let editingProductId = null; // Para saber si estamos editando o creando
+let globalProductsCache = []; // Cache para evitar llamadas extra al editar
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
-    renderAdminTable();
+    renderAdminTable(); // Ahora asincrono pero no bloquea
 
     const productForm = document.getElementById('productForm');
     if (productForm) {
         productForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            saveProduct();
+            handleSaveProduct();
         });
     }
 
@@ -27,8 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     previewImage.src = currentUploadedImageBase64;
                     previewContainer.classList.remove('d-none');
                     // Limpiar el campo de URL si se sube una imagen
-                    document.getElementById('perfumeImage').value = '';
-                    document.getElementById('perfumeImage').removeAttribute('required');
+                    const urlField = document.getElementById('perfumeImage');
+                    if(urlField) {
+                        urlField.value = '';
+                        urlField.removeAttribute('required');
+                    }
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -58,150 +64,184 @@ function checkAuth() {
     }
 }
 
-function logoutAdmin() {
+// Exponer logoutAdmin a window
+window.logoutAdmin = function() {
     sessionStorage.removeItem('off_essence_admin');
     window.location.href = 'index.html';
-}
+};
 
-function renderAdminTable() {
+async function renderAdminTable() {
     const tableBody = document.getElementById('adminProductTable');
     if (!tableBody) return;
 
-    tableBody.innerHTML = '';
-    const products = getProducts();
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Cargando inventario...</td></tr>';
+    
+    try {
+        globalProductsCache = await getProducts();
+        
+        tableBody.innerHTML = '';
+        if (globalProductsCache.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No hay perfumes registrados en el inventario.</td>
+                </tr>
+            `;
+            return;
+        }
 
-    if (products.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center text-muted py-4">No hay perfumes registrados en el inventario.</td>
-            </tr>
-        `;
-        return;
+        globalProductsCache.forEach(product => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="ps-4">
+                    <img src="${product.image}" alt="${product.name}" class="admin-table-img border border-light shadow-sm">
+                </td>
+                <td>
+                    <div class="font-serif fw-bold text-primary-dark">${product.name}</div>
+                    <div class="small text-muted fst-italic">${product.category || 'Sin categoría'}</div>
+                </td>
+                <td>
+                    <div class="text-muted small text-truncate" style="max-width: 200px;">${product.description}</div>
+                    <div class="fw-bold text-primary-dark mt-1">$${parseFloat(product.price || 0).toFixed(2)}</div>
+                </td>
+                <td class="font-sans fw-semibold ${product.stock < 10 ? 'text-danger' : 'text-success'}">${product.stock}</td>
+                <td class="text-end pe-4">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-dark" onclick="window.openProductModal('${product.id}')">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteProduct('${product.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error(error);
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error al cargar inventario: ${error.message}</td></tr>`;
     }
-
-    products.forEach(product => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="ps-4">
-                <img src="${product.image}" alt="${product.name}" class="admin-table-img border border-light shadow-sm">
-            </td>
-            <td class="font-serif fw-bold text-primary-dark">${product.name}</td>
-            <td class="text-muted small w-25 text-truncate" style="max-width: 250px;">${product.description}</td>
-            <td class="font-sans fw-semibold ${product.stock < 10 ? 'text-danger' : 'text-success'}">${product.stock}</td>
-            <td class="text-end pe-4">
-                <button class="btn btn-sm btn-outline-dark me-1" onclick="openProductModal('${product.id}')">
-                    <i class="bi bi-pencil"></i> Editar
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${product.id}')">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(tr);
-    });
 }
 
-function openProductModal(id = null) {
-    const modalEl = document.getElementById('productFormModal');
+// Exponer funciones necesarias para el HTML (onclick)
+window.openProductModal = function(productId = null) {
+    const modalEl = document.getElementById('productFormModal') || document.getElementById('productModal');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    if (!modal) {
+        modal = new bootstrap.Modal(modalEl);
+    }
+    
+    const titleEl = document.getElementById('productFormModalLabel') || document.getElementById('productModalLabel');
     const form = document.getElementById('productForm');
-    const modalTitle = document.getElementById('productFormModalLabel');
-    const submitBtn = document.getElementById('productSubmitBtn');
-
-    // Reset Form & Upload States
+    
+    // Reset form UI
     form.reset();
-    document.getElementById('perfumeId').value = '';
-    currentUploadedImageBase64 = null;
     document.getElementById('imagePreviewContainer').classList.add('d-none');
     document.getElementById('imagePreview').src = '';
+    currentUploadedImageBase64 = null;
+    
+    // Reset required
     document.getElementById('perfumeImage').setAttribute('required', 'true');
 
-    if (id) {
+    if (productId) {
         // Edit Mode
-        modalTitle.textContent = 'Editar Perfume';
-        if (submitBtn) submitBtn.textContent = 'Guardar Cambios';
-        const products = getProducts();
-        const product = products.find(p => p.id === id);
-
+        editingProductId = productId;
+        if(titleEl) titleEl.textContent = 'Editar Perfume';
+        
+        const product = globalProductsCache.find(p => p.id === productId);
         if (product) {
-            document.getElementById('perfumeId').value = product.id;
             document.getElementById('perfumeName').value = product.name;
-            document.getElementById('perfumeStock').value = product.stock;
+            document.getElementById('perfumePrice').value = product.price || '';
+            document.getElementById('perfumeCategory').value = product.category || '';
             document.getElementById('perfumeDesc').value = product.description;
+            document.getElementById('perfumeStock').value = product.stock;
+            document.getElementById('perfumeImage').value = product.image;
             
-            // Si la imagen es base64 (muy larga), la mostramos en el preview, si es corta en URL
-            if (product.image.length > 500 || product.image.startsWith('data:image')) {
-                currentUploadedImageBase64 = product.image;
-                document.getElementById('imagePreview').src = product.image;
-                document.getElementById('imagePreviewContainer').classList.remove('d-none');
-                document.getElementById('perfumeImage').removeAttribute('required');
-            } else {
-                document.getElementById('perfumeImage').value = product.image;
-            }
+            // Mostrar preview
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const previewImage = document.getElementById('imagePreview');
+            previewImage.src = product.image;
+            previewContainer.classList.remove('d-none');
+            
+            document.getElementById('perfumeImage').removeAttribute('required');
         }
     } else {
         // Create Mode
-        modalTitle.textContent = 'Agregar Nuevo Perfume';
-        if (submitBtn) submitBtn.textContent = 'Agregar Perfume';
+        editingProductId = null;
+        if(titleEl) titleEl.textContent = 'Nuevo Perfume';
     }
 
-    const modalInstance = new bootstrap.Modal(modalEl);
-    modalInstance.show();
-}
+    modal.show();
+};
 
-function saveProduct() {
-    const id = document.getElementById('perfumeId').value;
-    const name = document.getElementById('perfumeName').value.trim();
-    const stock = document.getElementById('perfumeStock').value;
-    let urlImage = document.getElementById('perfumeImage').value.trim();
-    const desc = document.getElementById('perfumeDesc').value.trim();
-
-    // Prefer uploaded image over URL
-    const finalImage = currentUploadedImageBase64 ? currentUploadedImageBase64 : urlImage;
-
-    if (!name || !stock || !finalImage || !desc) {
-        alert("Por favor, completa todos los campos (incluyendo Imagen o URL).");
-        return;
-    }
-
-    let products = getProducts();
-
-    if (id) {
-        // Update
-        const index = products.findIndex(p => p.id === id);
-        if (index > -1) {
-            products[index] = { id, name, stock: parseInt(stock), image: finalImage, description: desc };
+window.deleteProduct = async function(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este perfume?')) {
+        try {
+            await deleteProductFromDB(id);
+            await renderAdminTable(); // Recargar tabla
+        } catch (error) {
+            alert('Error al eliminar: ' + error.message);
         }
-    } else {
-        // Create
-        const newId = 'P' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        products.unshift({
-            id: newId,
-            name,
-            stock: parseInt(stock),
-            image: finalImage,
-            description: desc
-        });
+    }
+};
+
+async function handleSaveProduct() {
+    const name = document.getElementById('perfumeName').value;
+    const price = parseFloat(document.getElementById('perfumePrice').value) || 0;
+    const category = document.getElementById('perfumeCategory').value;
+    const desc = document.getElementById('perfumeDesc').value;
+    const stock = parseInt(document.getElementById('perfumeStock').value) || 0;
+    
+    // Prioridad: Imagen subida (Base64) > URL ingresada > URL existente (si editamos)
+    let image = document.getElementById('perfumeImage').value;
+    if (currentUploadedImageBase64) {
+        image = currentUploadedImageBase64;
     }
 
-    saveProducts(products);
-    renderAdminTable();
+    const productData = {
+        name: name,
+        price: price,
+        category: category, 
+        description: desc,
+        stock: stock,
+        image: image || 'placeholder.jpg'
+    };
+    
+    const modalEl = document.getElementById('productFormModal') || document.getElementById('productModal');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    if(!modal) modal = new bootstrap.Modal(modalEl); 
 
-    // Close Modal
-    const modalEl = document.getElementById('productFormModal');
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) modalInstance.hide();
-}
+    const btnSubmit = document.getElementById('productSubmitBtn') || document.querySelector('button[type="submit"]');
 
-function deleteProduct(id) {
-    if (confirm("¿Estás seguro de que deseas eliminar este perfume? Esta acción no se puede deshacer.")) {
-        let products = getProducts();
-        products = products.filter(p => p.id !== id);
-        saveProducts(products);
-        renderAdminTable();
+    try {
+        if(btnSubmit) {
+             btnSubmit.disabled = true;
+             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+        }
+
+        if (editingProductId) {
+            await updateProduct(editingProductId, productData);
+        } else {
+            await addProduct(productData);
+        }
         
-        // Remove related items from cart if necessary
-        let cart = getCart();
-        cart = cart.filter(item => item.id !== id);
-        saveCart(cart);
+        modal.hide();
+        // Limpiar backdrop residual
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        if(backdrops.length > 0) {
+           backdrops.forEach(b => b.remove());
+           document.body.classList.remove('modal-open');
+           document.body.style = '';
+        }
+
+        await renderAdminTable(); 
+        
+    } catch (error) {
+        alert('Error al guardar el producto: ' + error.message);
+    } finally {
+        if(btnSubmit) {
+             btnSubmit.disabled = false;
+             btnSubmit.innerHTML = 'Guardar Perfume';
+        }
     }
 }
